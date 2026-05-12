@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Pengaduan Masyarakat 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Google Sans', 'Roboto', sans-serif;
+    background: #F1F3F4;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── TOP NAV (Looker Studio style) ── */
+.topbar-logo{
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.topbar-logo img{
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+.topbar-title-wrap{
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.topbar-org{
+  font-size: 11px;
+  color: #5F6368;
+}
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #DADCE0;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 48px;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .topbar-logo {
+    width: 24px; height: 24px;
+    background: linear-gradient(135deg,#4285F4 0%,#34A853 50%,#FBBC04 75%,#EA4335 100%);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff; font-weight: 700;
+  }
+  .topbar-title { font-size: 16px; font-weight: 500; color: #202124; }
+  .topbar-sub { font-size: 12px; color: #5F6368; margin-left: auto; }
+
+  /* ── MAIN CONTAINER ── */
+  .page {
+    padding: 20px 24px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── REPORT HEADER ── */
+  .report-header {
+    background: linear-gradient(135deg, #1A237E 0%, #283593 60%, #3949AB 100%);
+    border-radius: 8px;
+    padding: 24px 32px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(26,35,126,.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 1px, transparent 1px, transparent 20px);
+  }
+  .report-header-icon { font-size: 36px; z-index: 1; }
+  .report-header-text { z-index: 1; }
+  .report-header h1 {
+    font-size: 22px; font-weight: 700; color: #fff; letter-spacing: .3px;
+  }
+  .report-header p {
+    font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px;
+  }
+  .header-badge {
+    margin-left: auto; z-index: 1;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11px; color: #fff; font-weight: 500;
+    backdrop-filter: blur(4px);
+  }
+
+.mini-stats{
+  display:flex;
+  justify-content:center;   /* bikin center */
+  gap:18px;
+  margin:14px auto 16px;
+  width:100%;
+}
+
+.mini-box{
+  flex:1;
+  max-width:150px;   /* sedang */
+  background:#F8F9FA;
+  border-radius:8px;
+  padding:18px 18px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #E0E0E0;
+}
+
+.mini-icon{
+  font-size:18px;
+}
+
+.mini-box .mini-label{
+  color:#f35757 !important;
+  font-size:15px;
+  font-weight:600;
+}
+
+.mini-box strong{
+  display:block;
+  font-size:16px;
+  color:#202124;
+  line-height:1.2;
+}
+
+.mini-box p{
+  font-size:10px;
+  color:#5F6368;
+  line-height:1.2;
+}
+.mini-label{
+  color:#C62828;   /* font merah */
+  font-size:11px;
+  font-weight:600;
+}
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 11px; font-weight: 600;
+    color: #5F6368; letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin: 20px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: #DADCE0;
+  }
+
+  /* ── KPI GRID ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .kpi-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+    transition: box-shadow .2s;
+  }
+  .kpi-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+  .kpi-header {
+    padding: 10px 14px;
+    font-size: 11px; font-weight: 600; color: #fff;
+    letter-spacing: .3px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .kpi-body { padding: 14px 16px 10px; text-align: center; }
+  .kpi-number {
+    font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -1px;
+  }
+  .kpi-sub { font-size: 11px; color: #5F6368; margin-top: 6px; padding-bottom: 4px; }
+
+  .kpi-blue .kpi-header  { background: #1565C0; }
+  .kpi-blue .kpi-number  { color: #1565C0; }
+  .kpi-teal .kpi-header  { background: #00796B; }
+  .kpi-teal .kpi-number  { color: #00796B; }
+  .kpi-purple .kpi-header { background: #6A1B9A; }
+  .kpi-purple .kpi-number { color: #6A1B9A; }
+  .kpi-red .kpi-header   { background: #C62828; }
+  .kpi-red .kpi-number   { color: #C62828; }
+
+ 
+  /* ── CHART GRID ── */
+  .chart-grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 12px;
+  }
+.chart-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}  .chart-card {
+    background: #fff; border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    overflow: hidden; transition: box-shadow .2s;
+  }
+  .chart-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+  .chart-header {
+    padding: 12px 16px; border-bottom: 1px solid #F1F3F4;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-header-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .chart-header h3 { font-size: 13px; font-weight: 600; color: #202124; }
+  .chart-header span { font-size: 11px; color: #5F6368; margin-left: auto; }
+  .chart-body {
+    padding: 16px; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .chart-body.pie  { padding: 12px 24px 20px; }
+  .chart-body.line { padding: 12px 16px 16px; }
+
+  /* ── DATA TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    background: #F8F9FA; color: #5F6368; font-weight: 600;
+    text-align: left; padding: 8px 12px;
+    border-bottom: 2px solid #DADCE0;
+    font-size: 11px; letter-spacing: .5px; text-transform: uppercase;
+  }
+  .data-table td { padding: 8px 12px; color: #202124; border-bottom: 1px solid #F1F3F4; }
+  .data-table tr:hover td { background: #F8F9FA; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .badge-green  { background: #E8F5E9; color: #2E7D32; }
+  .badge-blue   { background: #E3F2FD; color: #1565C0; }
+  .badge-red    { background: #FFEBEE; color: #C62828; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; font-size: 11px; color: #9AA0A6;
+    padding-top: 12px; border-top: 1px solid #DADCE0; margin-top: 8px;
+  }
+  .ls-bar {
+    background: #fff; border-top: 1px solid #DADCE0;
+    padding: 8px 24px; display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: #5F6368;
+    position: fixed; bottom: 0; left: 0; right: 0;
+  }
+  .ls-bar-dot { width: 8px; height: 8px; border-radius: 50%; background: #4285F4; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    <img src="logo bps (1).png" alt="Logo BPS">
+  </div>
+
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">Dashboard Pengaduan Masyarakat 2026</div>
+    <div class="topbar-org">Badan Pusat Statistik Kota Surabaya</div>
+  </div>
+
+  <div class="topbar-sub">Terakhir diperbarui: Mei 2026</div>
+</div>
+
+<div class="page">
+
+  <div class="report-header">
+    <div class="report-header-icon">📋</div>
+    <div class="report-header-text">
+      <h1>DASHBOARD PENGADUAN MASYARAKAT 2026</h1>
+      <p>Rekap &amp; Analisis Data Pengaduan dan Konsultasi &nbsp;|&nbsp; Periode Januari 2025 – Mei 2026 &nbsp;|&nbsp; Update: Mei 2026</p>
+    </div>
+    <div class="header-badge">📅 Tahun 2026</div>
+  </div>
+
+  <div class="section-label">Key Performance Indicators</div>
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-header">📋 Total Pengaduan</div>
+      <div class="kpi-body">
+        <div class="kpi-number">0</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-header">✅ Pengaduan Terselesaikan</div>
+      <div class="kpi-body">
+        <div class="kpi-number">0</div>
+      </div>
+    </div>
+   <div class="kpi-card kpi-purple">
+  <div class="kpi-header">📊 Total Permintaan dan Konsultasi Statistik</div>
+  <div class="kpi-body">
+    <div class="kpi-number">272</div>
+  </div>
+</div>
+
+<div class="kpi-card kpi-red">
+  <div class="kpi-header">✅ Permintaan & Konsultasi Terselesaikan</div>
+  <div class="kpi-body">
+    <div class="kpi-number">272</div>
+  </div>
+</div>
+  </div>
+
+<div class="section-label">Distribusi Pengaduan</div>
+
+<div class="chart-grid-2">
+  <!-- Kotak 1 -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-header-dot" style="background:#1565C0"></div>
+      <h3>Pengaduan per Bulan</h3>
+      <span>Total: 0%</span>
+    </div>
+    <div class="chart-body bar">
+      <canvas id="barPengaduan" width="500" height="240"></canvas>
+    </div>
+    <div class="mini-stats">
+  <div class="mini-box">
+    <span class="mini-icon">📈</span>
+    <div>
+       <small class="mini-label">Tertinggi</small>
+      <strong>0</strong>
+      <p>Oktober</p>
+    </div>
+  </div>
+
+  <div class="mini-box">
+    <span class="mini-icon">📉</span>
+    <div>
+     <small class="mini-label">Terendah</small>
+      <strong>0</strong>
+      <p>Juni</p>
+    </div>
+  </div>
+
+  <div class="mini-box">
+    <span class="mini-icon">📊</span>
+    <div>
+       <small class="mini-label">Rata-Rata</small>
+      <strong>0</strong>
+      <p>per bulan</p>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <!-- Kotak 2 -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-header-dot" style="background:#E65100"></div>
+      <h3>Tabel Detail Pengaduan Bulanan</h3>
+    </div>
+    <div style="padding:0 4px 12px;">
+      <table class="data-table">
+        <thead>
+          <tr><th>Bulan</th><th>Jumlah</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Januari 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Februari 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Maret 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>April 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Mei 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Juni 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Juli 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Agustus 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>September 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Oktober 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>November 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Desember 25</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Januari 26</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Februari 26</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Maret 26</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>April 26</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+          <tr><td>Mei 26</td><td>0</td><td><span class="badge badge-green">Normal</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> <!-- tutup chart-grid-2 untuk kotak 1 & 2 -->
+
+<div class="section-label">Distribusi Permintaan dan Konsultasi Statistik</div>
+
+<div class="chart-grid-2"> <!-- buka grid baru untuk kotak 3 & 4 -->
+
+<!-- Kotak 3 -->
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-header-dot" style="background:#6A1B9A"></div>
+    <h3>Total Permintaan dan Konsultasi Statistik per Bulan</h3>
+    <span>Total: 0%</span>
+  </div>
+
+  <div class="chart-body bar">
+    <canvas id="barPermintaan" width="500" height="240"></canvas>
+  </div>
+
+  <div class="mini-stats">
+    <div class="mini-box">
+      <span class="mini-icon">📈</span>
+      <div>
+        <small class="mini-label">Tertinggi</small>
+        <strong>30</strong>
+        <p>Jan 25 & Mei 25</p>
+      </div>
+    </div>
+
+    <div class="mini-box">
+      <span class="mini-icon">📉</span>
+      <div>
+        <small class="mini-label">Terendah</small>
+        <strong>1</strong>
+        <p>Mei 26</p>
+      </div>
+    </div>
+
+    <div class="mini-box">
+      <span class="mini-icon">📊</span>
+      <div>
+        <small class="mini-label">Rata-Rata</small>
+        <strong>16</strong>
+        <p>per bulan</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Kotak 4 -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-header-dot" style="background:#E65100"></div>
+      <h3>Tabel Permintaan dan Konsultasi Statistik Bulanan</h3>
+      </div>
+    <div style="padding:0 4px 12px; overflow-x:auto;">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Bulan</th>
+        <th>Email</th>
+        <th>Instagram</th>
+        <th>Stat Call</th>
+        <th>WA</th>
+        <th>Total</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Januari 2025</td><td>6</td><td>0</td><td>6</td><td>18</td><td>30</td><td><span class="badge badge-red">Tinggi</span></td></tr>
+      <tr><td>Februari 2025</td><td>2</td><td>0</td><td>6</td><td>20</td><td>28</td><td><span class="badge badge-red">Tinggi</span></td></tr>
+      <tr><td>Maret 2025</td><td>2</td><td>0</td><td>8</td><td>16</td><td>26</td><td><span class="badge badge-blue">Sedang</span></td></tr>
+      <tr><td>April 2025</td><td>3</td><td>0</td><td>9</td><td>9</td><td>21</td><td><span class="badge badge-blue">Sedang</span></td></tr>
+      <tr><td>Mei 2025</td><td>4</td><td>0</td><td>13</td><td>13</td><td>30</td><td><span class="badge badge-red">Tinggi</span></td></tr>
+      <tr><td>Juni 2025</td><td>5</td><td>0</td><td>5</td><td>4</td><td>14</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>Juli 2025</td><td>4</td><td>0</td><td>10</td><td>0</td><td>14</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>Agustus 2025</td><td>3</td><td>4</td><td>5</td><td>0</td><td>12</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>September 2025</td><td>1</td><td>0</td><td>18</td><td>0</td><td>19</td><td><span class="badge badge-blue">Sedang</span></td></tr>
+      <tr><td>Oktober 2025</td><td>8</td><td>0</td><td>15</td><td>0</td><td>23</td><td><span class="badge badge-blue">Sedang</span></td></tr>
+      <tr><td>November 2025</td><td>3</td><td>5</td><td>10</td><td>0</td><td>18</td><td><span class="badge badge-blue">Sedang</span></td></tr>
+      <tr><td>Desember 2025</td><td>6</td><td>0</td><td>5</td><td>0</td><td>11</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>Januari 2026</td><td>0</td><td>0</td><td>9</td><td>0</td><td>9</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>Februari 2026</td><td>0</td><td>0</td><td>5</td><td>0</td><td>5</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>Maret 2026</td><td>0</td><td>0</td><td>4</td><td>0</td><td>4</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>April 2026</td><td>0</td><td>0</td><td>5</td><td>1</td><td>6</td><td><span class="badge badge-green">Normal</span></td></tr>
+      <tr><td>Mei 2026</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td><td><span class="badge badge-green">Normal</span></td></tr>
+
+      <tr style="font-weight:700; background:#F8F9FA;">
+        <td>Grand Total</td>
+        <td>48</td>
+        <td>9</td>
+        <td>134</td>
+        <td>81</td>
+        <td>272</td>
+        <td>-</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  </div>
+
+</div>
+</div>
+
+<div class="ls-bar">
+  <div class="ls-bar-dot"></div>
+  Dashboard Monitoring Pengaduan dan Konsultasi Masyarakat | BPS Kota Surabaya | Tahun 2026
+</div>
+
+<script>
+// BAR CHART 1 - Pengaduan per Bulan
+new Chart(document.getElementById('barPengaduan'), {
+  type: 'bar',
+  data: {
+    labels: [
+  'Jan 25',
+  'Feb 25',
+  'Mar 25',
+  'Apr 25',
+  'Mei 25',
+  'Jun 25',
+  'Jul 25',
+  'Ags 25',
+  'Sep 25',
+  'Okt 25',
+  'Nov 25',
+  'Des 25',
+  'Jan 26',
+  'Feb 26',
+  'Mar 26',
+  'Apr 26',
+  'Mei 26'
+],
+    datasets: [{
+      label: 'Jumlah Pengaduan',
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: '#1565C0',
+      borderRadius: 5,
+      borderSkipped: false
+    }]
+  },
+
+  options: {
+    responsive: false,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        min: 0,
+        max: 10,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  }
+});
+
+// BAR CHART 2 - Permintaan & Konsultasi Statistik
+new Chart(document.getElementById('barPermintaan'), {
+  type: 'bar',
+  data: {
+  labels: [
+  'Jan 25',
+  'Feb 25',
+  'Mar 25',
+  'Apr 25',
+  'Mei 25',
+  'Jun 25',
+  'Jul 25',
+  'Ags 25',
+  'Sep 25',
+  'Okt 25',
+  'Nov 25',
+  'Des 25',
+  'Jan 26',
+  'Feb 26',
+  'Mar 26',
+  'Apr 26',
+  'Mei 26'
+],
+    datasets: [{
+      label: 'Jumlah Permintaan',
+      data: [
+  30, // Jan 2025
+  28, // Feb 2025
+  26, // Mar 2025
+  21, // Apr 2025
+  30, // Mei 2025
+  14, // Jun 2025
+  14, // Jul 2025
+  12, // Ags 2025
+  19, // Sep 2025
+  23, // Okt 2025
+  18, // Nov 2025
+  11, // Des 2025
+  9,  // Jan 2026
+  5,  // Feb 2026
+  4,  // Mar 2026
+  6,  // Apr 2026
+  1   // Mei 2026
+],
+      backgroundColor: '#6A1B9A',
+      borderRadius: 5,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: false,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
+"""
